@@ -265,12 +265,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\actor.c" />
+    <ClCompile Include="src\animated_sprite.c" />
     <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\scene.c" />
+    <ClCompile Include="src\scene_1.c" />
+    <ClCompile Include="src\scene_2.c" />
+    <ClCompile Include="src\sprite.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\raylib-master\raylib.vcxproj">
       <Project>{8898EA18-743A-15EF-5DF5-284349369C3F}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\actor.h" />
+    <ClInclude Include="src\animated_sprite.h" />
+    <ClInclude Include="src\scene.h" />
+    <ClInclude Include="src\scene_1.h" />
+    <ClInclude Include="src\scene_2.h" />
+    <ClInclude Include="src\sprite.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
