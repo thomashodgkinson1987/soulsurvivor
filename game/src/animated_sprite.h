@@ -34,7 +34,13 @@ struct animated_sprite
 {
     int x;
     int y;
+
+    Vector2 origin;
+    float rotation;
     Color tint;
+
+    bool is_flip_x;
+
     bool is_playing;
     struct animations animations;
     size_t current_animation_index;

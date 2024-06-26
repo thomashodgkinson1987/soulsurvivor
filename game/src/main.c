@@ -80,60 +80,41 @@ void game_init(void)
     tile_0014 = LoadTexture("resources/tile_0014.png");
     tile_0015 = LoadTexture("resources/tile_0015.png");
 
-    struct animated_sprite* items = malloc(sizeof(*items) * 2);
-    assert(items != NULL);
-    memset(items, 0, sizeof(*items) * 2);
-
-    animated_sprites = (struct animated_sprites)
     {
-        .items = items,
-        .count = 0,
-        .capacity = 2
-    };
+        struct animated_sprite* items = malloc(sizeof(*items));
+        assert(items != NULL);
+        memset(items, 0, sizeof(*items));
+
+        animated_sprites = (struct animated_sprites)
+        {
+            .items = items,
+            .count = 0,
+            .capacity = 1
+        };
+    }
 
     //
 
     animated_sprites.items[animated_sprites.count++] = animated_sprite_new(64, 64);
 
-    animated_sprite_create_animation(&animated_sprites.items[0], "anim_0001");
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0003, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0004, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0005, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0006, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0007, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0008, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0009, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0010, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0011, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0012, 0.1f);
+    animated_sprite_create_animation(&animated_sprites.items[0], "idle");
+    animated_sprite_add_frame(&animated_sprites.items[0], "idle", tile_0001, 1.0f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "idle", tile_0002, 1.0f);
 
-    animated_sprite_create_animation(&animated_sprites.items[0], "anim_0002");
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0012, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0011, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0010, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0009, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0008, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0007, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0006, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0005, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0004, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0003, 0.2f);
+    animated_sprite_create_animation(&animated_sprites.items[0], "walk");
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0003, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0004, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0005, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0006, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0007, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0008, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0009, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0010, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0011, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "walk", tile_0012, 0.1f);
 
-    //
-
-    animated_sprites.items[animated_sprites.count++] = animated_sprite_new(64 + 22, 64);
-
-    animated_sprite_create_animation(&animated_sprites.items[1], "anim_0001");
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0012, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0011, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0010, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0009, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0008, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0007, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0006, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0005, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0004, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0003, 0.2f);
+    animated_sprite_create_animation(&animated_sprites.items[0], "jump");
+    animated_sprite_add_frame(&animated_sprites.items[0], "jump", tile_0014, 1.0f);
 }
 void game_free(void)
 {
@@ -165,13 +146,20 @@ void game_free(void)
 }
 void game_tick(float delta)
 {
-    if (IsKeyPressed(KEY_ONE))
+    int input_x = 0;
+
+    if (IsKeyDown(KEY_LEFT)) --input_x;
+    if (IsKeyDown(KEY_RIGHT)) ++input_x;
+
+    if (input_x != 0)
     {
-        animated_sprite_play(&animated_sprites.items[0], "anim_0001");
+        animated_sprites.items[0].x += input_x * 4;
+        animated_sprite_play(&animated_sprites.items[0], "walk");
+        animated_sprites.items[0].is_flip_x = input_x == -1;
     }
-    if (IsKeyPressed(KEY_TWO))
+    else
     {
-        animated_sprite_play(&animated_sprites.items[0], "anim_0002");
+        animated_sprite_play(&animated_sprites.items[0], "idle");
     }
 
     for (size_t i = 0; i < animated_sprites.count; ++i)

@@ -23,7 +23,10 @@ struct animated_sprite animated_sprite_new(int x, int y)
     {
         .x = x,
         .y = y,
+        .origin = (Vector2){ 0.0f, 0.0f },
+        .rotation = 0.0f,
         .tint = WHITE,
+        .is_flip_x = false,
         .is_playing = true,
         .animations = animations,
         .current_animation_index = 0,
@@ -37,7 +40,11 @@ void animated_sprite_free(struct animated_sprite* animated_sprite)
     animated_sprite->x = 0;
     animated_sprite->y = 0;
 
+    animated_sprite->origin = (Vector2){ 0.0f, 0.0f };
+    animated_sprite->rotation = 0.0f;
     animated_sprite->tint = BLANK;
+
+    animated_sprite->is_flip_x = false;
 
     animated_sprite->is_playing = false;
 
@@ -171,8 +178,18 @@ void animated_sprite_draw(struct animated_sprite* animated_sprite)
     struct frame* frame = &animation->frames.items[animation->current_frame_index];
 
     Texture texture = frame->texture;
-    int x = animated_sprite->x;
-    int y = animated_sprite->y;
+    Rectangle source = (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    if (animated_sprite->is_flip_x)
+    {
+        source = (Rectangle){ 0.0f, 0.0f, -(float)texture.width, (float)texture.height };
+    }
+    Rectangle dest = (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    Vector2 origin = animated_sprite->origin;
+    float rotation = animated_sprite->rotation;
     Color tint = animated_sprite->tint;
-    DrawTexture(texture, x, y, tint);
+
+    dest.x += animated_sprite->x;
+    dest.y += animated_sprite->y;
+
+    DrawTexturePro(texture, source, dest, origin, rotation, tint);
 }
