@@ -25,26 +25,34 @@ struct actor_vtable
     size_t capacity;
 };
 
-void actor_vtable_init(void);
-void actor_vtable_free(void);
-size_t actor_vtable_register(struct actor_funcs);
-
-void actor_free(struct actor* actor);
-void actor_tick(struct actor* actor, float delta);
-void actor_draw(struct actor* actor);
-
 struct actor_data
 {
     float x;
     float y;
     float vx;
     float vy;
+    float jump_height;
+    size_t jump_count;
+    size_t jump_limit;
+    float gravity;
+    bool is_collision_down;
+    bool was_collision_down;
+    int input_x;
+    int input_y;
     struct animated_sprite animated_sprite;
 };
 
 size_t ACTOR_BASE_TAG;
 
-struct actor actor_new(struct animated_sprite animated_sprite);
+void actor_vtable_init(void);
+void actor_vtable_free(void);
+size_t actor_vtable_register(struct actor_funcs);
+
+struct actor actor_new(float x, float y, float jump_height, size_t jump_limit, float gravity, struct animated_sprite animated_sprite);
+
+void actor_free(struct actor* actor);
+void actor_tick(struct actor* actor, float delta);
+void actor_draw(struct actor* actor);
 
 void actor_base_free(struct actor* actor);
 void actor_base_tick(struct actor* actor, float delta);
