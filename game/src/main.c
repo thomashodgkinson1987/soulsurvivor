@@ -91,33 +91,49 @@ void game_init(void)
         .capacity = 2
     };
 
-    animated_sprites.items[animated_sprites.count++] = animated_sprite_new();
-    animated_sprites.items[0].x = 64;
-    animated_sprites.items[0].y = 64;
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0003, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0004, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0005, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0006, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0007, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0008, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0009, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0010, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0011, 0.1f);
-    animated_sprite_add_frame(&animated_sprites.items[0], tile_0012, 0.1f);
+    //
 
-    animated_sprites.items[animated_sprites.count++] = animated_sprite_new();
-    animated_sprites.items[1].x = 64 + 22;
-    animated_sprites.items[1].y = 64;
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0012, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0011, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0010, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0009, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0008, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0007, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0006, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0005, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0004, 0.2f);
-    animated_sprite_add_frame(&animated_sprites.items[1], tile_0003, 0.2f);
+    animated_sprites.items[animated_sprites.count++] = animated_sprite_new(64, 64);
+
+    animated_sprite_create_animation(&animated_sprites.items[0], "anim_0001");
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0003, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0004, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0005, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0006, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0007, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0008, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0009, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0010, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0011, 0.1f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0001", tile_0012, 0.1f);
+
+    animated_sprite_create_animation(&animated_sprites.items[0], "anim_0002");
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0012, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0011, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0010, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0009, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0008, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0007, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0006, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0005, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0004, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[0], "anim_0002", tile_0003, 0.2f);
+
+    //
+
+    animated_sprites.items[animated_sprites.count++] = animated_sprite_new(64 + 22, 64);
+
+    animated_sprite_create_animation(&animated_sprites.items[1], "anim_0001");
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0012, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0011, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0010, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0009, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0008, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0007, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0006, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0005, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0004, 0.2f);
+    animated_sprite_add_frame(&animated_sprites.items[1], "anim_0001", tile_0003, 0.2f);
 }
 void game_free(void)
 {
@@ -149,6 +165,15 @@ void game_free(void)
 }
 void game_tick(float delta)
 {
+    if (IsKeyPressed(KEY_ONE))
+    {
+        animated_sprite_play(&animated_sprites.items[0], "anim_0001");
+    }
+    if (IsKeyPressed(KEY_TWO))
+    {
+        animated_sprite_play(&animated_sprites.items[0], "anim_0002");
+    }
+
     for (size_t i = 0; i < animated_sprites.count; ++i)
         animated_sprite_tick(&animated_sprites.items[i], delta);
 }
