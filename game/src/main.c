@@ -1,4 +1,5 @@
 #include "animated_sprite.h"
+#include "actor.h"
 
 #include "raylib.h"
 
@@ -15,6 +16,8 @@ struct animated_sprites
 };
 
 struct animated_sprites animated_sprites = { 0 };
+
+struct actor actor = { 0 };
 
 Texture2D tiles_0001;
 
@@ -62,6 +65,10 @@ int main(void)
 
 void game_init(void)
 {
+    actor_vtable_init();
+
+    //
+
     tiles_0001 = LoadTexture("resources/tiles_0001.png");
 
     tile_0001 = LoadTexture("resources/tile_0001.png");
@@ -79,6 +86,8 @@ void game_init(void)
     tile_0013 = LoadTexture("resources/tile_0013.png");
     tile_0014 = LoadTexture("resources/tile_0014.png");
     tile_0015 = LoadTexture("resources/tile_0015.png");
+
+    //
 
     {
         struct animated_sprite* items = malloc(sizeof(*items));
@@ -115,9 +124,21 @@ void game_init(void)
 
     animated_sprite_create_animation(&animated_sprites.items[0], "jump");
     animated_sprite_add_frame(&animated_sprites.items[0], "jump", tile_0014, 1.0f);
+
+    //
+
+    actor = actor_new(animated_sprites.items[0]);
 }
 void game_free(void)
 {
+    actor_free(&actor);
+
+    //
+
+    actor_vtable_free();
+
+    //
+
     for (size_t i = 0; i < animated_sprites.count; ++i)
         animated_sprite_free(&animated_sprites.items[i]);
 
@@ -125,6 +146,8 @@ void game_free(void)
     animated_sprites.items = NULL;
     animated_sprites.count = 0;
     animated_sprites.capacity = 0;
+
+    //
 
     UnloadTexture(tiles_0001);
 
@@ -146,32 +169,14 @@ void game_free(void)
 }
 void game_tick(float delta)
 {
-    int input_x = 0;
-
-    if (IsKeyDown(KEY_LEFT)) --input_x;
-    if (IsKeyDown(KEY_RIGHT)) ++input_x;
-
-    if (input_x != 0)
-    {
-        animated_sprites.items[0].x += input_x * 4;
-        animated_sprite_play(&animated_sprites.items[0], "walk");
-        animated_sprites.items[0].is_flip_x = input_x == -1;
-    }
-    else
-    {
-        animated_sprite_play(&animated_sprites.items[0], "idle");
-    }
-
-    for (size_t i = 0; i < animated_sprites.count; ++i)
-        animated_sprite_tick(&animated_sprites.items[i], delta);
+    actor_tick(&actor, delta);
 }
 void game_draw(void)
 {
     BeginDrawing();
     ClearBackground(WHITE);
 
-    for (size_t i = 0; i < animated_sprites.count; ++i)
-        animated_sprite_draw(&animated_sprites.items[i]);
+    actor_draw(&actor);
 
     EndDrawing();
 }

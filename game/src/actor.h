@@ -1,7 +1,7 @@
 #ifndef ACTOR_H
 #define ACTOR_H
 
-#include "sprite.h"
+#include "animated_sprite.h"
 
 #include "raylib.h"
 
@@ -39,12 +39,13 @@ struct actor_data
     float y;
     float vx;
     float vy;
-    struct sprite sprite;
+    struct animated_sprite animated_sprite;
 };
 
 size_t ACTOR_BASE_TAG;
 
-struct actor actor(Texture2D texture);
+struct actor actor_new(struct animated_sprite animated_sprite);
+
 void actor_base_free(struct actor* actor);
 void actor_base_tick(struct actor* actor, float delta);
 void actor_base_draw(struct actor* actor);
