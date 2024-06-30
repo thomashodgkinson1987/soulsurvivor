@@ -81,10 +81,7 @@ struct button button_create(int x, int y, int width, int height, unsigned char c
         .width = width,
         .height = height,
 
-        .color_r = color_r,
-        .color_g = color_g,
-        .color_b = color_b,
-        .color_a = color_a,
+        .color = { color_r, color_g, color_b, color_a },
 
         .signal_on_hovered_array = signal_on_hovered_array,
         .signal_on_hovering_array = signal_on_hovering_array,
@@ -113,10 +110,7 @@ void button_free(struct button* button)
     button->width = 0;
     button->height = 0;
 
-    button->color_r = 0;
-    button->color_g = 0;
-    button->color_b = 0;
-    button->color_a = 0;
+    memset(button->color, 0, sizeof(button->color));
 
     free(button->signal_on_hovered_array.items);
     button->signal_on_hovered_array.items = NULL;

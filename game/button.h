@@ -53,10 +53,7 @@ struct button
     int width;
     int height;
 
-    unsigned char color_r;
-    unsigned char color_g;
-    unsigned char color_b;
-    unsigned char color_a;
+    unsigned char color[4];
 
     struct button_signal_on_hovered_array signal_on_hovered_array;
     struct button_signal_on_hovering_array signal_on_hovering_array;

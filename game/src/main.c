@@ -251,5 +251,7 @@ void on_released(struct button* button)
 
 void draw_button(struct button* button)
 {
-    DrawRectangle(button->x, button->y, button->width, button->height, (Color) { button->color_r, button->color_g, button->color_b, button->color_a });
+    Color color = BLANK;
+    memcpy(&color, button->color, sizeof(button->color));
+    DrawRectangle(button->x, button->y, button->width, button->height, color);
 }
