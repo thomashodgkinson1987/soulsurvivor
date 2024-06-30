@@ -1,6 +1,8 @@
 #include "animated_sprite.h"
 #include "actor.h"
 
+#include "button.h"
+
 #include "raylib.h"
 
 #include <assert.h>
@@ -27,10 +29,25 @@ struct animated_sprites animated_sprites = { 0 };
 
 struct actor actor = { 0 };
 
+struct button button = { 0 };
+
+bool mouse_is_pressed;
+bool mouse_was_pressed;
+
 void game_init(void);
 void game_free(void);
 void game_tick(float delta);
 void game_draw(void);
+
+void on_hovered(struct button* button);
+void on_hovering(struct button* button);
+void on_unhovered(struct button* button);
+
+void on_pressed(struct button* button);
+void on_held(struct button* button);
+void on_released(struct button* button);
+
+void draw_button(struct button* button);
 
 int main(void)
 {
@@ -126,9 +143,35 @@ void game_init(void)
     //
 
     actor = actor_new(GetScreenWidth() / 2.0f, GetScreenHeight() - 22.0f, 50.0f, 2, 500.0f, animated_sprites.items[0]);
+
+    //
+
+    button = button_create(8, 8, 64, 64, 0, 255, 0, 255);
+    button_register_signal_on_hovered(&button, on_hovered);
+    //button_register_signal_on_hovering(&button, on_hovering);
+    button_register_signal_on_unhovered(&button, on_unhovered);
+    button_register_signal_on_pressed(&button, on_pressed);
+    //button_register_signal_on_held(&button, on_held);
+    button_register_signal_on_released(&button, on_released);
+
+    button.on_draw = draw_button;
+
+    //
+
+    mouse_is_pressed = false;
+    mouse_was_pressed = false;
 }
 void game_free(void)
 {
+    mouse_is_pressed = false;
+    mouse_was_pressed = false;
+
+    //
+
+    button_free(&button);
+
+    //
+
     actor_free(&actor);
 
     //
@@ -157,6 +200,15 @@ void game_free(void)
 }
 void game_tick(float delta)
 {
+    Vector2 mouse_pos = GetMousePosition();
+    int mouse_x = (int)mouse_pos.x;
+    int mouse_y = (int)mouse_pos.y;
+
+    mouse_was_pressed = mouse_is_pressed;
+    mouse_is_pressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+
+    button_tick(&button, mouse_x, mouse_y, mouse_is_pressed, mouse_was_pressed);
+
     actor_tick(&actor, delta);
 }
 void game_draw(void)
@@ -166,5 +218,38 @@ void game_draw(void)
 
     actor_draw(&actor);
 
+    button_draw(&button);
+
     EndDrawing();
+}
+
+void on_hovered(struct button* button)
+{
+    printf("on_hovered\n");
+}
+void on_hovering(struct button* button)
+{
+    printf("on_hovering\n");
+}
+void on_unhovered(struct button* button)
+{
+    printf("on_unhovered\n");
+}
+
+void on_pressed(struct button* button)
+{
+    printf("on_pressed\n");
+}
+void on_held(struct button* button)
+{
+    printf("on_held\n");
+}
+void on_released(struct button* button)
+{
+    printf("on_released\n");
+}
+
+void draw_button(struct button* button)
+{
+    DrawRectangle(button->x, button->y, button->width, button->height, (Color) { button->color_r, button->color_g, button->color_b, button->color_a });
 }

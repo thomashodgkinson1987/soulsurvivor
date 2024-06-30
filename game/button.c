@@ -1,0 +1,466 @@
+#include "button.h"
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct button button_create(int x, int y, int width, int height, unsigned char color_r, unsigned char color_g, unsigned char color_b, unsigned char color_a)
+{
+    void(**signal_on_hovered_array_items)(struct button* button) = malloc(sizeof(*signal_on_hovered_array_items));
+    assert(signal_on_hovered_array_items != NULL);
+    memset(signal_on_hovered_array_items, 0, sizeof(*signal_on_hovered_array_items));
+
+    struct button_signal_on_hovered_array signal_on_hovered_array =
+    {
+        .items = signal_on_hovered_array_items,
+        .count = 0,
+        .capacity = 1
+    };
+
+    void(**signal_on_hovering_array_items)(struct button* button) = malloc(sizeof(*signal_on_hovering_array_items));
+    assert(signal_on_hovering_array_items != NULL);
+    memset(signal_on_hovering_array_items, 0, sizeof(*signal_on_hovering_array_items));
+
+    struct button_signal_on_hovering_array signal_on_hovering_array =
+    {
+        .items = signal_on_hovering_array_items,
+        .count = 0,
+        .capacity = 1
+    };
+
+    void(**signal_on_unhovered_array_items)(struct button* button) = malloc(sizeof(*signal_on_unhovered_array_items));
+    assert(signal_on_unhovered_array_items != NULL);
+    memset(signal_on_unhovered_array_items, 0, sizeof(*signal_on_unhovered_array_items));
+
+    struct button_signal_on_unhovered_array signal_on_unhovered_array =
+    {
+        .items = signal_on_unhovered_array_items,
+        .count = 0,
+        .capacity = 1
+    };
+
+    void(**signal_on_pressed_array_items)(struct button* button) = malloc(sizeof(*signal_on_pressed_array_items));
+    assert(signal_on_pressed_array_items != NULL);
+    memset(signal_on_pressed_array_items, 0, sizeof(*signal_on_pressed_array_items));
+
+    struct button_signal_on_pressed_array signal_on_pressed_array =
+    {
+        .items = signal_on_pressed_array_items,
+        .count = 0,
+        .capacity = 1
+    };
+
+    void(**signal_on_held_array_items)(struct button* button) = malloc(sizeof(*signal_on_held_array_items));
+    assert(signal_on_held_array_items != NULL);
+    memset(signal_on_held_array_items, 0, sizeof(*signal_on_held_array_items));
+
+    struct button_signal_on_held_array signal_on_held_array =
+    {
+        .items = signal_on_held_array_items,
+        .count = 0,
+        .capacity = 1
+    };
+
+    void(**signal_on_released_array_items)(struct button* button) = malloc(sizeof(*signal_on_released_array_items));
+    assert(signal_on_released_array_items != NULL);
+    memset(signal_on_released_array_items, 0, sizeof(*signal_on_released_array_items));
+
+    struct button_signal_on_released_array signal_on_released_array =
+    {
+        .items = signal_on_released_array_items,
+        .count = 0,
+        .capacity = 1
+    };
+
+    struct button button =
+    {
+        .x = x,
+        .y = y,
+
+        .width = width,
+        .height = height,
+
+        .color_r = color_r,
+        .color_g = color_g,
+        .color_b = color_b,
+        .color_a = color_a,
+
+        .signal_on_hovered_array = signal_on_hovered_array,
+        .signal_on_hovering_array = signal_on_hovering_array,
+        .signal_on_unhovered_array = signal_on_unhovered_array,
+
+        .signal_on_pressed_array = signal_on_pressed_array,
+        .signal_on_held_array = signal_on_held_array,
+        .signal_on_released_array = signal_on_released_array,
+
+        .is_hovering = false,
+        .was_hovering = false,
+
+        .is_pressed = false,
+        .was_pressed = false,
+
+        .on_draw = NULL
+    };
+
+    return button;
+}
+void button_free(struct button* button)
+{
+    button->x = 0;
+    button->y = 0;
+
+    button->width = 0;
+    button->height = 0;
+
+    button->color_r = 0;
+    button->color_g = 0;
+    button->color_b = 0;
+    button->color_a = 0;
+
+    free(button->signal_on_hovered_array.items);
+    button->signal_on_hovered_array.items = NULL;
+    button->signal_on_hovered_array.count = 0;
+    button->signal_on_hovered_array.capacity = 0;
+
+    free(button->signal_on_hovering_array.items);
+    button->signal_on_hovering_array.items = NULL;
+    button->signal_on_hovering_array.count = 0;
+    button->signal_on_hovering_array.capacity = 0;
+
+    free(button->signal_on_unhovered_array.items);
+    button->signal_on_unhovered_array.items = NULL;
+    button->signal_on_unhovered_array.count = 0;
+    button->signal_on_unhovered_array.capacity = 0;
+
+    free(button->signal_on_pressed_array.items);
+    button->signal_on_pressed_array.items = NULL;
+    button->signal_on_pressed_array.count = 0;
+    button->signal_on_pressed_array.capacity = 0;
+
+    free(button->signal_on_held_array.items);
+    button->signal_on_held_array.items = NULL;
+    button->signal_on_held_array.count = 0;
+    button->signal_on_held_array.capacity = 0;
+
+    free(button->signal_on_released_array.items);
+    button->signal_on_released_array.items = NULL;
+    button->signal_on_released_array.count = 0;
+    button->signal_on_released_array.capacity = 0;
+
+    button->is_hovering = false;
+    button->was_hovering = false;
+
+    button->is_pressed = false;
+    button->was_pressed = false;
+
+    button->on_draw = NULL;
+}
+
+void button_register_signal_on_hovered(struct button* button, void(*on_hovered)(struct button* button))
+{
+    if (button->signal_on_hovered_array.count == button->signal_on_hovered_array.capacity)
+    {
+        void(**ptr)(struct button* button) = realloc(button->signal_on_hovered_array.items, sizeof(*ptr) * button->signal_on_hovered_array.capacity * 2);
+        assert(ptr != NULL);
+        memset(&ptr[button->signal_on_hovered_array.count], 0, sizeof(*ptr) * button->signal_on_hovered_array.capacity);
+        button->signal_on_hovered_array.items = ptr;
+        button->signal_on_hovered_array.capacity *= 2;
+    }
+
+    button->signal_on_hovered_array.items[button->signal_on_hovered_array.count++] = on_hovered;
+}
+void button_register_signal_on_hovering(struct button* button, void(*on_hovering)(struct button* button))
+{
+    if (button->signal_on_hovering_array.count == button->signal_on_hovering_array.capacity)
+    {
+        void(**ptr)(struct button* button) = realloc(button->signal_on_hovering_array.items, sizeof(*ptr) * button->signal_on_hovering_array.capacity * 2);
+        assert(ptr != NULL);
+        memset(&ptr[button->signal_on_hovering_array.count], 0, sizeof(*ptr) * button->signal_on_hovering_array.capacity);
+        button->signal_on_hovering_array.items = ptr;
+        button->signal_on_hovering_array.capacity *= 2;
+    }
+
+    button->signal_on_hovering_array.items[button->signal_on_hovering_array.count++] = on_hovering;
+}
+void button_register_signal_on_unhovered(struct button* button, void(*on_unhovered)(struct button* button))
+{
+    if (button->signal_on_unhovered_array.count == button->signal_on_unhovered_array.capacity)
+    {
+        void(**ptr)(struct button* button) = realloc(button->signal_on_unhovered_array.items, sizeof(*ptr) * button->signal_on_unhovered_array.capacity * 2);
+        assert(ptr != NULL);
+        memset(&ptr[button->signal_on_unhovered_array.count], 0, sizeof(*ptr) * button->signal_on_unhovered_array.capacity);
+        button->signal_on_unhovered_array.items = ptr;
+        button->signal_on_unhovered_array.capacity *= 2;
+    }
+
+    button->signal_on_unhovered_array.items[button->signal_on_unhovered_array.count++] = on_unhovered;
+}
+
+void button_register_signal_on_pressed(struct button* button, void(*on_pressed)(struct button* button))
+{
+    if (button->signal_on_pressed_array.count == button->signal_on_pressed_array.capacity)
+    {
+        void(**ptr)(struct button* button) = realloc(button->signal_on_pressed_array.items, sizeof(*ptr) * button->signal_on_pressed_array.capacity * 2);
+        assert(ptr != NULL);
+        memset(&ptr[button->signal_on_pressed_array.count], 0, sizeof(*ptr) * button->signal_on_pressed_array.capacity);
+        button->signal_on_pressed_array.items = ptr;
+        button->signal_on_pressed_array.capacity *= 2;
+    }
+
+    button->signal_on_pressed_array.items[button->signal_on_pressed_array.count++] = on_pressed;
+}
+void button_register_signal_on_held(struct button* button, void(*on_held)(struct button* button))
+{
+    if (button->signal_on_held_array.count == button->signal_on_held_array.capacity)
+    {
+        void(**ptr)(struct button* button) = realloc(button->signal_on_held_array.items, sizeof(*ptr) * button->signal_on_held_array.capacity * 2);
+        assert(ptr != NULL);
+        memset(&ptr[button->signal_on_held_array.count], 0, sizeof(*ptr) * button->signal_on_held_array.capacity);
+        button->signal_on_held_array.items = ptr;
+        button->signal_on_held_array.capacity *= 2;
+    }
+
+    button->signal_on_held_array.items[button->signal_on_held_array.count++] = on_held;
+}
+void button_register_signal_on_released(struct button* button, void(*on_released)(struct button* button))
+{
+    if (button->signal_on_released_array.count == button->signal_on_released_array.capacity)
+    {
+        void(**ptr)(struct button* button) = realloc(button->signal_on_released_array.items, sizeof(*ptr) * button->signal_on_released_array.capacity * 2);
+        assert(ptr != NULL);
+        memset(&ptr[button->signal_on_released_array.count], 0, sizeof(*ptr) * button->signal_on_released_array.capacity);
+        button->signal_on_released_array.items = ptr;
+        button->signal_on_released_array.capacity *= 2;
+    }
+
+    button->signal_on_released_array.items[button->signal_on_released_array.count++] = on_released;
+}
+
+void button_unregister_signal_on_hovered(struct button* button, void(*on_hovered)(struct button* button))
+{
+    size_t index = 0;
+    bool was_found = false;
+
+    for (size_t i = 0; i < button->signal_on_hovered_array.count; ++i)
+    {
+        if (button->signal_on_hovered_array.items[i] == on_hovered)
+        {
+            index = i;
+            was_found = true;
+            break;
+        }
+    }
+
+    assert(was_found);
+
+    for (size_t i = index; i < button->signal_on_hovered_array.count - 1; ++i)
+    {
+        button->signal_on_hovered_array.items[i] = button->signal_on_hovered_array.items[i + 1];
+    }
+
+    button->signal_on_hovered_array.items[--button->signal_on_hovered_array.count] = NULL;
+}
+void button_unregister_signal_on_hovering(struct button* button, void(*on_hovering)(struct button* button))
+{
+    size_t index = 0;
+    bool was_found = false;
+
+    for (size_t i = 0; i < button->signal_on_hovering_array.count; ++i)
+    {
+        if (button->signal_on_hovering_array.items[i] == on_hovering)
+        {
+            index = i;
+            was_found = true;
+            break;
+        }
+    }
+
+    assert(was_found);
+
+    for (size_t i = index; i < button->signal_on_hovering_array.count - 1; ++i)
+    {
+        button->signal_on_hovering_array.items[i] = button->signal_on_hovering_array.items[i + 1];
+    }
+
+    button->signal_on_hovering_array.items[--button->signal_on_hovering_array.count] = NULL;
+}
+void button_unregister_signal_on_unhovered(struct button* button, void(*on_unhovered)(struct button* button))
+{
+    size_t index = 0;
+    bool was_found = false;
+
+    for (size_t i = 0; i < button->signal_on_unhovered_array.count; ++i)
+    {
+        if (button->signal_on_unhovered_array.items[i] == on_unhovered)
+        {
+            index = i;
+            was_found = true;
+            break;
+        }
+    }
+
+    assert(was_found);
+
+    for (size_t i = index; i < button->signal_on_unhovered_array.count - 1; ++i)
+    {
+        button->signal_on_unhovered_array.items[i] = button->signal_on_unhovered_array.items[i + 1];
+    }
+
+    button->signal_on_unhovered_array.items[--button->signal_on_unhovered_array.count] = NULL;
+}
+
+void button_unregister_signal_on_pressed(struct button* button, void(*on_pressed)(struct button* button))
+{
+    size_t index = 0;
+    bool was_found = false;
+
+    for (size_t i = 0; i < button->signal_on_pressed_array.count; ++i)
+    {
+        if (button->signal_on_pressed_array.items[i] == on_pressed)
+        {
+            index = i;
+            was_found = true;
+            break;
+        }
+    }
+
+    assert(was_found);
+
+    for (size_t i = index; i < button->signal_on_pressed_array.count - 1; ++i)
+    {
+        button->signal_on_pressed_array.items[i] = button->signal_on_pressed_array.items[i + 1];
+    }
+
+    button->signal_on_pressed_array.items[--button->signal_on_pressed_array.count] = NULL;
+}
+void button_unregister_signal_on_held(struct button* button, void(*on_held)(struct button* button))
+{
+    size_t index = 0;
+    bool was_found = false;
+
+    for (size_t i = 0; i < button->signal_on_held_array.count; ++i)
+    {
+        if (button->signal_on_held_array.items[i] == on_held)
+        {
+            index = i;
+            was_found = true;
+            break;
+        }
+    }
+
+    assert(was_found);
+
+    for (size_t i = index; i < button->signal_on_held_array.count - 1; ++i)
+    {
+        button->signal_on_held_array.items[i] = button->signal_on_held_array.items[i + 1];
+    }
+
+    button->signal_on_held_array.items[--button->signal_on_held_array.count] = NULL;
+}
+void button_unregister_signal_on_released(struct button* button, void(*on_released)(struct button* button))
+{
+    size_t index = 0;
+    bool was_found = false;
+
+    for (size_t i = 0; i < button->signal_on_released_array.count; ++i)
+    {
+        if (button->signal_on_released_array.items[i] == on_released)
+        {
+            index = i;
+            was_found = true;
+            break;
+        }
+    }
+
+    assert(was_found);
+
+    for (size_t i = index; i < button->signal_on_released_array.count - 1; ++i)
+    {
+        button->signal_on_released_array.items[i] = button->signal_on_released_array.items[i + 1];
+    }
+
+    button->signal_on_released_array.items[--button->signal_on_released_array.count] = NULL;
+}
+
+void button_on_hovered(struct button* button)
+{
+    for (size_t i = 0; i < button->signal_on_hovered_array.count; ++i)
+        button->signal_on_hovered_array.items[i](button);
+}
+void button_on_hovering(struct button* button)
+{
+    for (size_t i = 0; i < button->signal_on_hovering_array.count; ++i)
+        button->signal_on_hovering_array.items[i](button);
+}
+void button_on_unhovered(struct button* button)
+{
+    for (size_t i = 0; i < button->signal_on_unhovered_array.count; ++i)
+        button->signal_on_unhovered_array.items[i](button);
+}
+
+void button_on_pressed(struct button* button)
+{
+    for (size_t i = 0; i < button->signal_on_pressed_array.count; ++i)
+        button->signal_on_pressed_array.items[i](button);
+}
+void button_on_held(struct button* button)
+{
+    for (size_t i = 0; i < button->signal_on_held_array.count; ++i)
+        button->signal_on_held_array.items[i](button);
+}
+void button_on_released(struct button* button)
+{
+    for (size_t i = 0; i < button->signal_on_released_array.count; ++i)
+        button->signal_on_released_array.items[i](button);
+}
+
+void button_tick(struct button* button, int cursor_x, int cursor_y, bool is_pressed, bool was_pressed)
+{
+    // Update previous states
+    button->was_hovering = button->is_hovering;
+    button->was_pressed = button->is_pressed;
+
+    // Determine if the cursor is within button bounds
+    bool cursor_within_bounds = (cursor_x >= button->x && cursor_x < button->x + button->width &&
+        cursor_y >= button->y && cursor_y < button->y + button->height);
+
+    // Update current states
+    button->is_hovering = cursor_within_bounds;
+    button->is_pressed = button->is_hovering && is_pressed;
+
+    // Handle hover events
+    if (!was_pressed && !is_pressed && !button->was_hovering && button->is_hovering)
+    {
+        button_on_hovered(button);
+    }
+    else if (!was_pressed && !is_pressed && button->was_hovering && button->is_hovering)
+    {
+        button_on_hovering(button);
+    }
+    else if (!was_pressed && !is_pressed && button->was_hovering && !button->is_hovering)
+    {
+        button_on_unhovered(button);
+    }
+
+    // Handle pressed events
+    if (!was_pressed && is_pressed && button->is_hovering)
+    {
+        button_on_pressed(button);
+    }
+    else if (was_pressed && is_pressed && button->is_hovering)
+    {
+        button_on_held(button);
+    }
+    else if (was_pressed && !is_pressed && button->is_hovering)
+    {
+        button_on_released(button);
+    }
+}
+void button_draw(struct button* button)
+{
+    if (button->on_draw != NULL)
+    {
+        button->on_draw(button);
+    }
+}

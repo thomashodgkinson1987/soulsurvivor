@@ -178,11 +178,7 @@ void animated_sprite_draw(struct animated_sprite* animated_sprite)
     struct frame* frame = &animation->frames.items[animation->current_frame_index];
 
     Texture texture = frame->texture;
-    Rectangle source = (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height };
-    if (animated_sprite->is_flip_x)
-    {
-        source = (Rectangle){ 0.0f, 0.0f, -(float)texture.width, (float)texture.height };
-    }
+    Rectangle source = (Rectangle){ 0.0f, 0.0f, animated_sprite->is_flip_x ? -(float)texture.width : (float)texture.width, (float)texture.height };
     Rectangle dest = (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height };
     Vector2 origin = animated_sprite->origin;
     float rotation = animated_sprite->rotation;

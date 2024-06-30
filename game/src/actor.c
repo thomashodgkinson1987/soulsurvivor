@@ -1,7 +1,5 @@
 #include "actor.h"
 
-#include "sprite.h"
-
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -168,20 +166,20 @@ void actor_base_tick(struct actor* actor, float delta)
     if (!data->is_collision_down)
     {
         animated_sprite_play(&data->animated_sprite, "jump");
-        data->animated_sprite.is_flip_x = data->input_x == -1;
+    }
+    else if (data->input_x == 0)
+    {
+        animated_sprite_play(&data->animated_sprite, "idle");
     }
     else
     {
-        if (data->input_x == 0)
-        {
-            animated_sprite_play(&data->animated_sprite, "idle");
-        }
-        else
-        {
-            animated_sprite_play(&data->animated_sprite, "walk");
-            data->animated_sprite.is_flip_x = data->input_x == -1;
-        }
+        animated_sprite_play(&data->animated_sprite, "walk");
     }
+
+    if (data->input_x == -1)
+        data->animated_sprite.is_flip_x = true;
+    else if (data->input_x == 1)
+        data->animated_sprite.is_flip_x = false;
 
     //
 
