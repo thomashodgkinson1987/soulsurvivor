@@ -273,6 +273,9 @@
     <ClCompile Include="src\scene_1.c" />
     <ClCompile Include="src\scene_2.c" />
     <ClCompile Include="src\sprite.c" />
+    <ClCompile Include="src\tween.c" />
+    <ClCompile Include="src\tween_group.c" />
+    <ClCompile Include="src\tween_sequence.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\raylib-master\raylib.vcxproj">
@@ -283,10 +286,14 @@
     <ClInclude Include="button.h" />
     <ClInclude Include="src\actor.h" />
     <ClInclude Include="src\animated_sprite.h" />
+    <ClInclude Include="src\mfn_dynamic_array.h" />
     <ClInclude Include="src\scene.h" />
     <ClInclude Include="src\scene_1.h" />
     <ClInclude Include="src\scene_2.h" />
     <ClInclude Include="src\sprite.h" />
+    <ClInclude Include="src\tween.h" />
+    <ClInclude Include="src\tween_group.h" />
+    <ClInclude Include="src\tween_sequence.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
