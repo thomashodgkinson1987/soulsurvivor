@@ -81,11 +81,20 @@ void game_init(void)
         .height = 56.0f,
         .color = GREEN
     };
+    struct box box_4 =
+    {
+        .x = 256.0f,
+        .y = 128.0f,
+        .width = 72.0f,
+        .height = 56.0f,
+        .color = PURPLE
+    };
 
     MFN_ARRAY_APPEND(struct box, &boxes, box_1);
     // cppcheck-suppress C6386
     MFN_ARRAY_APPEND(struct box, &boxes, box_2);
     MFN_ARRAY_PREPEND(struct box, &boxes, box_3);
+    MFN_ARRAY_INSERT(struct box, &boxes, 2, box_4);
 }
 void game_free(void)
 {
