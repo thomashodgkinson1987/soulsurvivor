@@ -1,5 +1,7 @@
 #include "actor.h"
 
+#include "mfn_dynamic_array.h"
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -10,16 +12,7 @@ static struct actor_vtable vtable = { 0 };
 
 void actor_vtable_init(void)
 {
-    struct actor_funcs* vtable_items = malloc(sizeof(*vtable_items));
-    assert(vtable_items != NULL);
-    memset(vtable_items, 0, sizeof(*vtable_items));
-
-    vtable = (struct actor_vtable)
-    {
-        .items = vtable_items,
-        .count = 0,
-        .capacity = 1
-    };
+    MFN_ARRAY_INIT(struct actor_vtable, &vtable);
 
     struct actor_funcs actor_base_funcs = (struct actor_funcs)
     {
@@ -31,25 +24,14 @@ void actor_vtable_init(void)
 }
 void actor_vtable_free(void)
 {
-    free(vtable.items);
-    vtable.items = NULL;
-    vtable.count = 0;
-    vtable.capacity = 0;
+    MFN_ARRAY_FREE(struct actor_vtable, &vtable);
 }
 size_t actor_vtable_register(struct actor_funcs funcs)
 {
-    if (vtable.count == vtable.capacity)
-    {
-        struct actor_funcs* ptr = realloc(vtable.items, sizeof(*ptr) * vtable.capacity * 2);
-        assert(ptr != NULL);
-        memset(&ptr[vtable.count], 0, sizeof(*ptr) * vtable.capacity);
-        vtable.items = ptr;
-        vtable.capacity *= 2;
-    }
+    size_t index = vtable.count;
+    MFN_ARRAY_APPEND(struct actor_funcs, &vtable, funcs);
 
-    vtable.items[vtable.count] = funcs;
-
-    return vtable.count++;
+    return index;
 }
 
 struct actor actor_new(float x, float y, float jump_height, size_t jump_limit, float gravity, struct animated_sprite animated_sprite)

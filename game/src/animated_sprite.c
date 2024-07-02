@@ -1,5 +1,7 @@
 #include "animated_sprite.h"
 
+#include "mfn_dynamic_array.h"
+
 #include "raylib.h"
 
 #include <assert.h>
@@ -9,15 +11,8 @@
 
 struct animated_sprite animated_sprite_new(int x, int y)
 {
-    struct animation* animations_items = malloc(sizeof(*animations_items));
-    assert(animations_items != NULL);
-    memset(animations_items, 0, sizeof(*animations_items));
-    struct animations animations =
-    {
-        .items = animations_items,
-        .count = 0,
-        .capacity = 1
-    };
+    struct animations animations = { 0 };
+    MFN_ARRAY_INIT(struct animation, &animations);
 
     struct animated_sprite animated_sprite =
     {
@@ -51,14 +46,10 @@ void animated_sprite_free(struct animated_sprite* animated_sprite)
     for (size_t i = 0; i < animated_sprite->animations.count; ++i)
     {
         struct animation* animation = &animated_sprite->animations.items[i];
-        struct frame* frames_items = animation->frames.items;
-        free(frames_items);
+        MFN_ARRAY_FREE(struct frame, &animation->frames);
     }
 
-    free(animated_sprite->animations.items);
-    animated_sprite->animations.items = NULL;
-    animated_sprite->animations.count = 0;
-    animated_sprite->animations.capacity = 0;
+    MFN_ARRAY_FREE(struct animation, &animated_sprite->animations);
 
     animated_sprite->current_animation_index = 0;
     animated_sprite->elapsed_time = 0.0f;
@@ -66,25 +57,8 @@ void animated_sprite_free(struct animated_sprite* animated_sprite)
 
 void animated_sprite_create_animation(struct animated_sprite* animated_sprite, char* animation_name)
 {
-    if (animated_sprite->animations.count == animated_sprite->animations.capacity)
-    {
-        struct animation* ptr = realloc(animated_sprite->animations.items, sizeof(*ptr) * animated_sprite->animations.capacity * 2);
-        assert(ptr != NULL);
-        memset(&ptr[animated_sprite->animations.count], 0, sizeof(*ptr) * animated_sprite->animations.capacity);
-        animated_sprite->animations.items = ptr;
-        animated_sprite->animations.capacity *= 2;
-    }
-
-    struct frame* frames_items = malloc(sizeof(*frames_items));
-    assert(frames_items != NULL);
-    memset(frames_items, 0, sizeof(*frames_items));
-
-    struct frames frames =
-    {
-        .items = frames_items,
-        .count = 0,
-        .capacity = 1
-    };
+    struct frames frames = { 0 };
+    MFN_ARRAY_INIT(struct frame, &frames);
 
     struct animation animation =
     {
@@ -93,7 +67,7 @@ void animated_sprite_create_animation(struct animated_sprite* animated_sprite, c
         .current_frame_index = 0
     };
 
-    animated_sprite->animations.items[animated_sprite->animations.count++] = animation;
+    MFN_ARRAY_APPEND(struct animation, &animated_sprite->animations, animation);
 }
 void animated_sprite_add_frame(struct animated_sprite* animated_sprite, char* animation_name, Texture2D texture, float duration)
 {
@@ -110,22 +84,13 @@ void animated_sprite_add_frame(struct animated_sprite* animated_sprite, char* an
 
     assert(animation != NULL);
 
-    if (animation->frames.count == animation->frames.capacity)
-    {
-        struct frame* ptr = realloc(animation->frames.items, sizeof(*ptr) * animation->frames.capacity * 2);
-        assert(ptr != NULL);
-        memset(&ptr[animation->frames.count], 0, sizeof(*ptr) * animation->frames.capacity);
-        animation->frames.items = ptr;
-        animation->frames.capacity *= 2;
-    }
-
     struct frame frame =
     {
         .texture = texture,
         .duration = duration
     };
 
-    animation->frames.items[animation->frames.count++] = frame;
+    MFN_ARRAY_APPEND(struct frame, &animation->frames, frame);
 }
 void animated_sprite_play(struct animated_sprite* animated_sprite, char* animation_name)
 {
