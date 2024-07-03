@@ -16,7 +16,7 @@ do \
     (array_struct)->capacity = 1; \
 } while (0)
 
-#define MFN_ARRAY_APPEND(type, array_struct, item) \
+#define MFN_ARRAY_RESIZE(type, array_struct) \
 do \
 { \
     if ((array_struct)->count == (array_struct)->capacity) \
@@ -28,20 +28,18 @@ do \
         (array_struct)->items = ptr; \
         (array_struct)->capacity = new_capacity; \
     } \
+} while (0)
+
+#define MFN_ARRAY_APPEND(type, array_struct, item) \
+do \
+{ \
+    MFN_ARRAY_RESIZE(type, array_struct); \
     (array_struct)->items[(array_struct)->count++] = item; \
 } while (0)
 
 #define MFN_ARRAY_PREPEND(type, array_struct, item) \
 do { \
-    if ((array_struct)->count == (array_struct)->capacity) \
-    { \
-        size_t new_capacity = (array_struct)->capacity * 2; \
-        type* ptr = realloc((array_struct)->items, sizeof(*ptr) * new_capacity); \
-        assert(ptr != NULL); \
-        memset(&ptr[(array_struct)->count], 0, sizeof(*ptr) * ((array_struct)->capacity)); \
-        (array_struct)->items = ptr; \
-        (array_struct)->capacity = new_capacity; \
-    } \
+    MFN_ARRAY_RESIZE(type, array_struct); \
     memmove(&(array_struct)->items[1], &(array_struct)->items[0], sizeof(*(array_struct)->items) * (array_struct)->count); \
     (array_struct)->items[0] = item; \
     ++(array_struct)->count; \
@@ -49,15 +47,7 @@ do { \
 
 #define MFN_ARRAY_INSERT(type, array_struct, index, item) \
 do { \
-    if ((array_struct)->count == (array_struct)->capacity) \
-    { \
-        size_t new_capacity = (array_struct)->capacity * 2; \
-        type* ptr = realloc((array_struct)->items, sizeof(*ptr) * new_capacity); \
-        assert(ptr != NULL); \
-        memset(&ptr[(array_struct)->count], 0, sizeof(*ptr) * ((array_struct)->capacity)); \
-        (array_struct)->items = ptr; \
-        (array_struct)->capacity = new_capacity; \
-    } \
+    MFN_ARRAY_RESIZE(type, array_struct); \
     memmove(&(array_struct)->items[index + 1], &(array_struct)->items[index], sizeof(*(array_struct)->items) * ((array_struct)->count - index)); \
     (array_struct)->items[index] = item; \
     ++(array_struct)->count; \
