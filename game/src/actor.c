@@ -12,7 +12,7 @@ static struct actor_vtable vtable = { 0 };
 
 void actor_vtable_init(void)
 {
-    MFN_ARRAY_INIT(struct actor_vtable, &vtable);
+    MFN_ARRAY_INIT(struct actor_funcs, &vtable);
 
     struct actor_funcs actor_base_funcs = (struct actor_funcs)
     {
@@ -24,7 +24,7 @@ void actor_vtable_init(void)
 }
 void actor_vtable_free(void)
 {
-    MFN_ARRAY_FREE(struct actor_vtable, &vtable);
+    MFN_ARRAY_FREE(&vtable);
 }
 size_t actor_vtable_register(struct actor_funcs funcs)
 {

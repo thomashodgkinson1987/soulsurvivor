@@ -46,10 +46,10 @@ void animated_sprite_free(struct animated_sprite* animated_sprite)
     for (size_t i = 0; i < animated_sprite->animations.count; ++i)
     {
         struct animation* animation = &animated_sprite->animations.items[i];
-        MFN_ARRAY_FREE(struct frame, &animation->frames);
+        MFN_ARRAY_FREE(&animation->frames);
     }
 
-    MFN_ARRAY_FREE(struct animation, &animated_sprite->animations);
+    MFN_ARRAY_FREE(&animated_sprite->animations);
 
     animated_sprite->current_animation_index = 0;
     animated_sprite->elapsed_time = 0.0f;

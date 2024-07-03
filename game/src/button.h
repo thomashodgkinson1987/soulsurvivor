@@ -3,44 +3,51 @@
 
 #include <stdbool.h>
 
+typedef void(*button_signal_on_hovered)(struct button* button);
+typedef void(*button_signal_on_hovering)(struct button* button);
+typedef void(*button_signal_on_unhovered)(struct button* button);
+typedef void(*button_signal_on_pressed)(struct button* button);
+typedef void(*button_signal_on_held)(struct button* button);
+typedef void(*button_signal_on_released)(struct button* button);
+
 struct button_signal_on_hovered_array
 {
-    void(**items)(struct button* button);
+    button_signal_on_hovered* items;
     size_t count;
     size_t capacity;
 };
 
 struct button_signal_on_hovering_array
 {
-    void(**items)(struct button* button);
+    button_signal_on_hovering* items;
     size_t count;
     size_t capacity;
 };
 
 struct button_signal_on_unhovered_array
 {
-    void(**items)(struct button* button);
+    button_signal_on_unhovered* items;
     size_t count;
     size_t capacity;
 };
 
 struct button_signal_on_pressed_array
 {
-    void(**items)(struct button* button);
+    button_signal_on_pressed* items;
     size_t count;
     size_t capacity;
 };
 
 struct button_signal_on_held_array
 {
-    void(**items)(struct button* button);
+    button_signal_on_held* items;
     size_t count;
     size_t capacity;
 };
 
 struct button_signal_on_released_array
 {
-    void(**items)(struct button* button);
+    button_signal_on_released* items;
     size_t count;
     size_t capacity;
 };
@@ -72,24 +79,24 @@ struct button
     void(*on_draw)(struct button* button);
 };
 
-struct button button_create(int x, int y, int width, int height, unsigned char color_r, unsigned char color_g, unsigned char color_b, unsigned char color_a);
+struct button button_new(int x, int y, int width, int height, unsigned char color_r, unsigned char color_g, unsigned char color_b, unsigned char color_a);
 void button_free(struct button* button);
 
-void button_register_signal_on_hovered(struct button* button, void(*on_hovered)(struct button* button));
-void button_register_signal_on_hovering(struct button* button, void(*on_hovering)(struct button* button));
-void button_register_signal_on_unhovered(struct button* button, void(*on_unhovered)(struct button* button));
+void button_register_signal_on_hovered(struct button* button, button_signal_on_hovered signal);
+void button_register_signal_on_hovering(struct button* button, button_signal_on_hovering signal);
+void button_register_signal_on_unhovered(struct button* button, button_signal_on_unhovered signal);
 
-void button_register_signal_on_pressed(struct button* button, void(*on_pressed)(struct button* button));
-void button_register_signal_on_held(struct button* button, void(*on_held)(struct button* button));
-void button_register_signal_on_released(struct button* button, void(*on_released)(struct button* button));
+void button_register_signal_on_pressed(struct button* button, button_signal_on_pressed signal);
+void button_register_signal_on_held(struct button* button, button_signal_on_held signal);
+void button_register_signal_on_released(struct button* button, button_signal_on_released signal);
 
-void button_unregister_signal_on_hovered(struct button* button, void(*on_hovered)(struct button* button));
-void button_unregister_signal_on_hovering(struct button* button, void(*on_hovering)(struct button* button));
-void button_unregister_signal_on_unhovered(struct button* button, void(*on_unhovered)(struct button* button));
+void button_unregister_signal_on_hovered(struct button* button, button_signal_on_hovered signal);
+void button_unregister_signal_on_hovering(struct button* button, button_signal_on_hovering signal);
+void button_unregister_signal_on_unhovered(struct button* button, button_signal_on_unhovered signal);
 
-void button_unregister_signal_on_pressed(struct button* button, void(*on_pressed)(struct button* button));
-void button_unregister_signal_on_held(struct button* button, void(*on_held)(struct button* button));
-void button_unregister_signal_on_released(struct button* button, void(*on_released)(struct button* button));
+void button_unregister_signal_on_pressed(struct button* button, button_signal_on_pressed signal);
+void button_unregister_signal_on_held(struct button* button, button_signal_on_held signal);
+void button_unregister_signal_on_released(struct button* button, button_signal_on_released signal);
 
 void button_on_hovered(struct button* button);
 void button_on_hovering(struct button* button);

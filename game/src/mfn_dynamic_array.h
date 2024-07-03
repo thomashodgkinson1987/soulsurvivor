@@ -63,7 +63,7 @@ do { \
     ++(array_struct)->count; \
 } while (0)
 
-#define MFN_ARRAY_FREE(type, array_struct) \
+#define MFN_ARRAY_FREE(array_struct) \
 do \
 { \
     if ((array_struct)->items != NULL) \
