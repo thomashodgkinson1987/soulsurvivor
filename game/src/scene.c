@@ -2,6 +2,8 @@
 #include "scene_1.h"
 #include "scene_2.h"
 
+#include "mfn_dynamic_array.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,16 +13,7 @@ static struct scene_vtable vtable = { 0 };
 
 void scene_vtable_init(void)
 {
-    struct scene_funcs* funcs = malloc(sizeof(*funcs));
-    assert(funcs != NULL);
-    memset(funcs, 0, sizeof(*funcs));
-
-    vtable = (struct scene_vtable)
-    {
-        .items = funcs,
-        .count = 0,
-        .capacity = 1
-    };
+    MFN_ARRAY_INIT(struct scene_funcs, &vtable);
 
     struct scene_funcs scene_1_funcs =
     {
@@ -46,25 +39,14 @@ void scene_vtable_init(void)
 }
 void scene_vtable_free(void)
 {
-    free(vtable.items);
-    vtable.items = NULL;
-    vtable.count = 0;
-    vtable.capacity = 0;
+    MFN_ARRAY_FREE(&vtable);
 }
 size_t scene_vtable_register(struct scene_funcs funcs)
 {
-    if (vtable.count == vtable.capacity)
-    {
-        struct scene_funcs* ptr = realloc(vtable.items, sizeof(*ptr) * vtable.capacity * 2);
-        assert(ptr != NULL);
-        memset(&ptr[vtable.count], 0, sizeof(*ptr) * vtable.capacity);
-        vtable.items = ptr;
-        vtable.capacity *= 2;
-    }
+    size_t index = vtable.count;
+    MFN_ARRAY_APPEND(struct scene_funcs, &vtable, funcs);
 
-    vtable.items[vtable.count] = funcs;
-
-    return vtable.count++;
+    return index;
 }
 
 void scene_init(struct scene* scene)
