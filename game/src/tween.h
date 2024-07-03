@@ -5,15 +5,15 @@
 
 struct tween
 {
+    float* value;
     float from;
     float to;
     float duration;
     float elapsed;
-    float value;
     bool is_complete;
 };
 
-struct tween tween_new(float from, float to, float duration);
+struct tween tween_new(float* value, float from, float to, float duration);
 void tween_free(struct tween* tween);
 
 void tween_tick(struct tween* tween, float delta);

@@ -3,11 +3,16 @@
 
 #include "tween_group.h"
 
-struct tween_sequence
+struct tween_groups
 {
-    struct tween_group* tween_groups;
+    struct tween_group* items;
     size_t count;
     size_t capacity;
+};
+
+struct tween_sequence
+{
+    struct tween_groups tween_groups;
     size_t index;
     bool is_complete;
 };

@@ -5,11 +5,16 @@
 
 #include <stddef.h>
 
-struct tween_group
+struct tweens
 {
-    struct tween* tweens;
+    struct tween* items;
     size_t count;
     size_t capacity;
+};
+
+struct tween_group
+{
+    struct tweens tweens;
     bool is_complete;
 };
 
