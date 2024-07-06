@@ -163,7 +163,6 @@ void game_init_animation_sets(void)
     MFN_ARRAY_APPEND(struct animation, &animation_set_0001, animations.items[0]);
     MFN_ARRAY_APPEND(struct animation, &animation_set_0001, animations.items[1]);
     MFN_ARRAY_APPEND(struct animation, &animation_set_0001, animations.items[2]);
-
     MFN_ARRAY_APPEND(struct animations, &animation_sets, animation_set_0001);
 }
 void game_init(void)
