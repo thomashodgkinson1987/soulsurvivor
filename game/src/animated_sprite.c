@@ -1,31 +1,25 @@
 #include "animated_sprite.h"
 
-#include "mfn_dynamic_array.h"
-
 #include "raylib.h"
 
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-struct animated_sprite animated_sprite_new(int x, int y)
+struct animated_sprite animated_sprite_new(struct animation_player animation_player)
 {
-    struct animations animations = { 0 };
-    MFN_ARRAY_INIT(struct animation, &animations);
-
     struct animated_sprite animated_sprite =
     {
-        .x = x,
-        .y = y,
+        .x = 0.0f,
+        .y = 0.0f,
+
         .origin = (Vector2){ 0.0f, 0.0f },
         .rotation = 0.0f,
         .tint = WHITE,
+
         .is_flip_x = false,
-        .is_playing = true,
-        .animations = animations,
-        .current_animation_index = 0,
-        .elapsed_time = 0.0f
+        .is_flip_y = false,
+
+        .animation_player = animation_player
     };
 
     return animated_sprite;
@@ -40,114 +34,40 @@ void animated_sprite_free(struct animated_sprite* animated_sprite)
     animated_sprite->tint = BLANK;
 
     animated_sprite->is_flip_x = false;
+    animated_sprite->is_flip_y = false;
 
-    animated_sprite->is_playing = false;
-
-    for (size_t i = 0; i < animated_sprite->animations.count; ++i)
-    {
-        struct animation* animation = &animated_sprite->animations.items[i];
-        MFN_ARRAY_FREE(&animation->frames);
-    }
-
-    MFN_ARRAY_FREE(&animated_sprite->animations);
-
-    animated_sprite->current_animation_index = 0;
-    animated_sprite->elapsed_time = 0.0f;
+    animated_sprite->animation_player = (struct animation_player){ 0 };
 }
 
-void animated_sprite_create_animation(struct animated_sprite* animated_sprite, char* animation_name)
+void animated_sprite_play(struct animated_sprite* animated_sprite, char* name)
 {
-    struct frames frames = { 0 };
-    MFN_ARRAY_INIT(struct frame, &frames);
-
-    struct animation animation =
-    {
-        .name = animation_name,
-        .frames = frames,
-        .current_frame_index = 0
-    };
-
-    MFN_ARRAY_APPEND(struct animation, &animated_sprite->animations, animation);
+    animation_player_play(&animated_sprite->animation_player, name);
 }
-void animated_sprite_add_frame(struct animated_sprite* animated_sprite, char* animation_name, Texture2D texture, float duration)
-{
-    struct animation* animation = NULL;
-
-    for (size_t i = 0; i < animated_sprite->animations.count; ++i)
-    {
-        animation = &animated_sprite->animations.items[i];
-        if (strcmp(animation->name, animation_name) == 0)
-        {
-            break;
-        }
-    }
-
-    assert(animation != NULL);
-
-    struct frame frame =
-    {
-        .texture = texture,
-        .duration = duration
-    };
-
-    MFN_ARRAY_APPEND(struct frame, &animation->frames, frame);
-}
-void animated_sprite_play(struct animated_sprite* animated_sprite, char* animation_name)
-{
-    size_t index = 0;
-    struct animation* animation = NULL;
-
-    for (size_t i = 0; i < animated_sprite->animations.count; ++i)
-    {
-        animation = &animated_sprite->animations.items[i];
-        if (strcmp(animation->name, animation_name) == 0)
-        {
-            index = i;
-            break;
-        }
-    }
-
-    assert(animation != NULL);
-
-    if (index != animated_sprite->current_animation_index)
-    {
-        animation->current_frame_index = 0;
-
-        animated_sprite->is_playing = true;
-        animated_sprite->current_animation_index = index;
-        animated_sprite->elapsed_time = 0.0f;
-    }
-}
-
 void animated_sprite_tick(struct animated_sprite* animated_sprite, float delta)
 {
-    if (!animated_sprite->is_playing) return;
-
-    animated_sprite->elapsed_time += delta;
-
-    struct animation* animation = &animated_sprite->animations.items[animated_sprite->current_animation_index];
-
-    while (animated_sprite->elapsed_time >= animation->frames.items[animation->current_frame_index].duration)
-    {
-        animated_sprite->elapsed_time -= animation->frames.items[animation->current_frame_index].duration;
-        ++animation->current_frame_index;
-        if (animation->current_frame_index == animation->frames.count)
-        {
-            animation->current_frame_index = 0;
-        }
-    }
+    animation_player_tick(&animated_sprite->animation_player, delta);
 }
 void animated_sprite_draw(struct animated_sprite* animated_sprite)
 {
-    struct animation* animation = &animated_sprite->animations.items[animated_sprite->current_animation_index];
-    struct frame* frame = &animation->frames.items[animation->current_frame_index];
+    struct animation_player* animation_player = &animated_sprite->animation_player;
+    struct animation* animation = &animation_player->animations.items[animation_player->current_animation_index];
+    struct frame* frame = &animation->frames.items[animation_player->current_frame_index];
 
     Texture texture = frame->texture;
-    Rectangle source = (Rectangle){ 0.0f, 0.0f, animated_sprite->is_flip_x ? -(float)texture.width : (float)texture.width, (float)texture.height };
+    Rectangle source = (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height };
     Rectangle dest = (Rectangle){ 0.0f, 0.0f, (float)texture.width, (float)texture.height };
     Vector2 origin = animated_sprite->origin;
     float rotation = animated_sprite->rotation;
     Color tint = animated_sprite->tint;
+
+    if (animated_sprite->is_flip_x)
+    {
+        source.width *= -1.0f;
+    }
+    if (animated_sprite->is_flip_y)
+    {
+        source.height *= -1.0f;
+    }
 
     dest.x += animated_sprite->x;
     dest.y += animated_sprite->y;

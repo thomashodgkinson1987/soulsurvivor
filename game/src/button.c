@@ -2,31 +2,8 @@
 
 #include "mfn_dynamic_array.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 struct button button_new(int x, int y, int width, int height, unsigned char color_r, unsigned char color_g, unsigned char color_b, unsigned char color_a)
 {
-    struct button_signal_on_hovered_array signal_on_hovered_array = { 0 };
-    MFN_ARRAY_INIT(button_signal_on_hovered, &signal_on_hovered_array);
-
-    struct button_signal_on_hovering_array signal_on_hovering_array = { 0 };
-    MFN_ARRAY_INIT(button_signal_on_hovering, &signal_on_hovering_array);
-
-    struct button_signal_on_unhovered_array signal_on_unhovered_array = { 0 };
-    MFN_ARRAY_INIT(button_signal_on_unhovered, &signal_on_unhovered_array);
-
-    struct button_signal_on_pressed_array signal_on_pressed_array = { 0 };
-    MFN_ARRAY_INIT(button_signal_on_pressed, &signal_on_pressed_array);
-
-    struct button_signal_on_held_array signal_on_held_array = { 0 };
-    MFN_ARRAY_INIT(button_signal_on_held, &signal_on_held_array);
-
-    struct button_signal_on_released_array signal_on_released_array = { 0 };
-    MFN_ARRAY_INIT(button_signal_on_released, &signal_on_released_array);
-
     struct button button =
     {
         .x = x,
@@ -37,13 +14,13 @@ struct button button_new(int x, int y, int width, int height, unsigned char colo
 
         .color = { color_r, color_g, color_b, color_a },
 
-        .signal_on_hovered_array = signal_on_hovered_array,
-        .signal_on_hovering_array = signal_on_hovering_array,
-        .signal_on_unhovered_array = signal_on_unhovered_array,
+        .signal_on_hovered_array = { 0 },
+        .signal_on_hovering_array = { 0 },
+        .signal_on_unhovered_array = { 0 },
 
-        .signal_on_pressed_array = signal_on_pressed_array,
-        .signal_on_held_array = signal_on_held_array,
-        .signal_on_released_array = signal_on_released_array,
+        .signal_on_pressed_array = { 0 },
+        .signal_on_held_array = { 0 },
+        .signal_on_released_array = { 0 },
 
         .is_hovering = false,
         .was_hovering = false,
@@ -53,6 +30,13 @@ struct button button_new(int x, int y, int width, int height, unsigned char colo
 
         .on_draw = NULL
     };
+
+    MFN_ARRAY_INIT(button_signal_on_hovered, &button.signal_on_hovered_array);
+    MFN_ARRAY_INIT(button_signal_on_hovering, &button.signal_on_hovering_array);
+    MFN_ARRAY_INIT(button_signal_on_unhovered, &button.signal_on_unhovered_array);
+    MFN_ARRAY_INIT(button_signal_on_pressed, &button.signal_on_pressed_array);
+    MFN_ARRAY_INIT(button_signal_on_held, &button.signal_on_held_array);
+    MFN_ARRAY_INIT(button_signal_on_released, &button.signal_on_released_array);
 
     return button;
 }
@@ -258,21 +242,30 @@ void button_on_hovered(struct button* button)
 {
     for (size_t i = 0; i < button->signal_on_hovered_array.count; ++i)
     {
-        button->signal_on_hovered_array.items[i](button);
+        if (button->signal_on_hovered_array.items[i])
+        {
+            button->signal_on_hovered_array.items[i](button);
+        }
     }
 }
 void button_on_hovering(struct button* button)
 {
     for (size_t i = 0; i < button->signal_on_hovering_array.count; ++i)
     {
-        button->signal_on_hovering_array.items[i](button);
+        if (button->signal_on_hovering_array.items[i])
+        {
+            button->signal_on_hovering_array.items[i](button);
+        }
     }
 }
 void button_on_unhovered(struct button* button)
 {
     for (size_t i = 0; i < button->signal_on_unhovered_array.count; ++i)
     {
-        button->signal_on_unhovered_array.items[i](button);
+        if (button->signal_on_unhovered_array.items[i])
+        {
+            button->signal_on_unhovered_array.items[i](button);
+        }
     }
 }
 
@@ -280,21 +273,30 @@ void button_on_pressed(struct button* button)
 {
     for (size_t i = 0; i < button->signal_on_pressed_array.count; ++i)
     {
-        button->signal_on_pressed_array.items[i](button);
+        if (button->signal_on_pressed_array.items[i])
+        {
+            button->signal_on_pressed_array.items[i](button);
+        }
     }
 }
 void button_on_held(struct button* button)
 {
     for (size_t i = 0; i < button->signal_on_held_array.count; ++i)
     {
-        button->signal_on_held_array.items[i](button);
+        if (button->signal_on_held_array.items[i])
+        {
+            button->signal_on_held_array.items[i](button);
+        }
     }
 }
 void button_on_released(struct button* button)
 {
     for (size_t i = 0; i < button->signal_on_released_array.count; ++i)
     {
-        button->signal_on_released_array.items[i](button);
+        if (button->signal_on_released_array.items[i])
+        {
+            button->signal_on_released_array.items[i](button);
+        }
     }
 }
 
@@ -342,7 +344,7 @@ void button_tick(struct button* button, int cursor_x, int cursor_y, bool is_pres
 }
 void button_draw(struct button* button)
 {
-    if (button->on_draw != NULL)
+    if (button->on_draw)
     {
         button->on_draw(button);
     }

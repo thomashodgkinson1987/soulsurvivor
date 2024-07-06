@@ -267,7 +267,10 @@
   <ItemGroup>
     <ClCompile Include="src\actor.c" />
     <ClCompile Include="src\animated_sprite.c" />
+    <ClCompile Include="src\animation.c" />
+    <ClCompile Include="src\animation_player.c" />
     <ClCompile Include="src\button.c" />
+    <ClCompile Include="src\frame.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\scene.c" />
     <ClCompile Include="src\scene_1.c" />
@@ -285,7 +288,10 @@
   <ItemGroup>
     <ClInclude Include="src\actor.h" />
     <ClInclude Include="src\animated_sprite.h" />
+    <ClInclude Include="src\animation.h" />
+    <ClInclude Include="src\animation_player.h" />
     <ClInclude Include="src\button.h" />
+    <ClInclude Include="src\frame.h" />
     <ClInclude Include="src\mfn_dynamic_array.h" />
     <ClInclude Include="src\scene.h" />
     <ClInclude Include="src\scene_1.h" />

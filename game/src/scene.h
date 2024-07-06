@@ -1,8 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "raylib.h"
-
 struct scene
 {
     size_t tag;
@@ -11,7 +9,6 @@ struct scene
 
 struct scene_funcs
 {
-    void(*init)(struct scene* scene);
     void(*free)(struct scene* scene);
     void(*enter)(struct scene* scene);
     void(*exit)(struct scene* scene);
@@ -30,7 +27,9 @@ void scene_vtable_init(void);
 void scene_vtable_free(void);
 size_t scene_vtable_register(struct scene_funcs funcs);
 
-void scene_init(struct scene* scene);
+extern size_t SCENE_BASE_TAG;
+
+struct scene scene_new(size_t tag, void* data);
 void scene_free(struct scene* scene);
 void scene_enter(struct scene* scene);
 void scene_exit(struct scene* scene);

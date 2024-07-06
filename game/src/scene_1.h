@@ -8,10 +8,9 @@ struct scene_1_data
     float t;
 };
 
-size_t SCENE_1_TAG;
+extern size_t SCENE_1_TAG;
 
-struct scene scene_1(float x, float y);
-void scene_1_init(struct scene* scene);
+struct scene scene_1_new(float x, float y);
 void scene_1_free(struct scene* scene);
 void scene_1_enter(struct scene* scene);
 void scene_1_exit(struct scene* scene);

@@ -4,72 +4,108 @@
 
 #include "mfn_dynamic_array.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 static struct scene_vtable vtable = { 0 };
+
+size_t SCENE_BASE_TAG = 0;
 
 void scene_vtable_init(void)
 {
     MFN_ARRAY_INIT(struct scene_funcs, &vtable);
 
-    struct scene_funcs scene_1_funcs =
+    SCENE_BASE_TAG = scene_vtable_register((struct scene_funcs)
     {
-        .init = scene_1_init,
-        .free = scene_1_free,
-        .enter = scene_1_enter,
-        .exit = scene_1_exit,
-        .tick = scene_1_tick,
-        .draw = scene_1_draw,
-    };
-    SCENE_1_TAG = scene_vtable_register(scene_1_funcs);
+        .free = NULL,
+            .enter = NULL,
+            .exit = NULL,
+            .tick = NULL,
+            .draw = NULL
+    });
 
-    struct scene_funcs scene_2_funcs =
+    SCENE_1_TAG = scene_vtable_register((struct scene_funcs)
     {
-        .init = scene_2_init,
+        .free = scene_1_free,
+            .enter = scene_1_enter,
+            .exit = scene_1_exit,
+            .tick = scene_1_tick,
+            .draw = scene_1_draw
+    });
+
+    SCENE_2_TAG = scene_vtable_register((struct scene_funcs)
+    {
         .free = scene_2_free,
-        .enter = scene_2_enter,
-        .exit = scene_2_exit,
-        .tick = scene_2_tick,
-        .draw = scene_2_draw,
-    };
-    SCENE_2_TAG = scene_vtable_register(scene_2_funcs);
+            .enter = scene_2_enter,
+            .exit = scene_2_exit,
+            .tick = scene_2_tick,
+            .draw = scene_2_draw
+    });
 }
 void scene_vtable_free(void)
 {
     MFN_ARRAY_FREE(&vtable);
+
+    SCENE_BASE_TAG = 0;
+    SCENE_1_TAG = 0;
+    SCENE_2_TAG = 0;
 }
 size_t scene_vtable_register(struct scene_funcs funcs)
 {
-    size_t index = vtable.count;
+    size_t tag = vtable.count;
+
     MFN_ARRAY_APPEND(struct scene_funcs, &vtable, funcs);
 
-    return index;
+    return tag;
 }
 
-void scene_init(struct scene* scene)
+struct scene scene_new(size_t tag, void* data)
 {
-    vtable.items[scene->tag].init(scene);
+    struct scene scene =
+    {
+        .tag = tag,
+        .data = data
+    };
+
+    return scene;
 }
 void scene_free(struct scene* scene)
 {
-    vtable.items[scene->tag].free(scene);
+    if (vtable.items[scene->tag].free)
+    {
+        vtable.items[scene->tag].free(scene);
+    }
+
+    scene->tag = 0;
+
+    if (scene->data)
+    {
+        free(scene->data);
+        scene->data = NULL;
+    }
 }
 void scene_enter(struct scene* scene)
 {
-    vtable.items[scene->tag].enter(scene);
+    if (vtable.items[scene->tag].enter)
+    {
+        vtable.items[scene->tag].enter(scene);
+    }
 }
 void scene_exit(struct scene* scene)
 {
-    vtable.items[scene->tag].exit(scene);
+    if (vtable.items[scene->tag].exit)
+    {
+        vtable.items[scene->tag].exit(scene);
+    }
 }
 void scene_tick(struct scene* scene, float delta)
 {
-    vtable.items[scene->tag].tick(scene, delta);
+    if (vtable.items[scene->tag].tick)
+    {
+        vtable.items[scene->tag].tick(scene, delta);
+    }
 }
 void scene_draw(struct scene* scene)
 {
-    vtable.items[scene->tag].draw(scene);
+    if (vtable.items[scene->tag].draw)
+    {
+        vtable.items[scene->tag].draw(scene);
+    }
 }

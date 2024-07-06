@@ -2,9 +2,6 @@
 
 #include "mfn_dynamic_array.h"
 
-#include <assert.h>
-#include <stdlib.h>
-
 struct tween_sequence tween_sequence_new(void)
 {
     struct tween_sequence tween_sequence =
@@ -34,6 +31,17 @@ void tween_sequence_free(struct tween_sequence* tween_sequence)
 void tween_sequence_add(struct tween_sequence* tween_sequence, struct tween_group tween_group)
 {
     MFN_ARRAY_APPEND(struct tween_group, &tween_sequence->tween_groups, tween_group);
+}
+
+void tween_sequence_reset(struct tween_sequence* tween_sequence)
+{
+    for (size_t i = 0; i < tween_sequence->tween_groups.count; ++i)
+    {
+        tween_group_reset(&tween_sequence->tween_groups.items[i]);
+    }
+
+    tween_sequence->index = 0;
+    tween_sequence->is_complete = false;
 }
 
 void tween_sequence_tick(struct tween_sequence* tween_sequence, float delta)

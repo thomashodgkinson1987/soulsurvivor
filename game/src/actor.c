@@ -2,53 +2,57 @@
 
 #include "mfn_dynamic_array.h"
 
-#include <assert.h>
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 static struct actor_vtable vtable = { 0 };
+
+size_t ACTOR_BASE_TAG = 0;
+size_t ACTOR_PLAYER_TAG = 0;
 
 void actor_vtable_init(void)
 {
     MFN_ARRAY_INIT(struct actor_funcs, &vtable);
 
-    struct actor_funcs actor_base_funcs = (struct actor_funcs)
+    ACTOR_BASE_TAG = actor_vtable_register((struct actor_funcs)
     {
-        .free = actor_base_free,
-        .tick = actor_base_tick,
-        .draw = actor_base_draw
-    };
-    ACTOR_BASE_TAG = actor_vtable_register(actor_base_funcs);
+        .tick = NULL
+    });
+
+    ACTOR_PLAYER_TAG = actor_vtable_register((struct actor_funcs)
+    {
+        .tick = actor_player_tick
+    });
 }
 void actor_vtable_free(void)
 {
     MFN_ARRAY_FREE(&vtable);
+
+    ACTOR_BASE_TAG = 0;
+    ACTOR_PLAYER_TAG = 0;
 }
 size_t actor_vtable_register(struct actor_funcs funcs)
 {
-    size_t index = vtable.count;
+    size_t tag = vtable.count;
+
     MFN_ARRAY_APPEND(struct actor_funcs, &vtable, funcs);
 
-    return index;
+    return tag;
 }
 
-struct actor actor_new(float x, float y, float jump_height, size_t jump_limit, float gravity, struct animated_sprite animated_sprite)
+struct actor actor_new(size_t tag, void* data, float x, float y, struct animated_sprite animated_sprite)
 {
-    struct actor_data* data = malloc(sizeof(*data));
-    assert(data != NULL);
-
-    *data = (struct actor_data)
+    struct actor actor =
     {
+        .tag = tag,
+        .data = data,
         .x = x,
         .y = y,
         .vx = 0.0f,
         .vy = 0.0f,
-        .jump_height = jump_height,
-        .jump_limit = jump_limit,
+        .jump_height = 64.0f,
+        .jump_limit = 1,
         .jump_count = 0,
-        .gravity = gravity,
+        .gravity = 500.0f,
         .is_collision_down = false,
         .was_collision_down = false,
         .input_x = 0,
@@ -56,122 +60,139 @@ struct actor actor_new(float x, float y, float jump_height, size_t jump_limit, f
         .animated_sprite = animated_sprite
     };
 
-    struct actor actor =
-    {
-        .data = data,
-        .tag = ACTOR_BASE_TAG
-    };
-
     return actor;
 }
 
 void actor_free(struct actor* actor)
 {
-    vtable.items[actor->tag].free(actor);
+    actor->tag = 0;
+
+    if (actor->data)
+    {
+        free(actor->data);
+        actor->data = NULL;
+    }
+
+    actor->x = 0.0f;
+    actor->y = 0.0f;
+
+    actor->vx = 0.0f;
+    actor->vy = 0.0f;
+
+    actor->jump_height = 0.0f;
+    actor->jump_limit = 0;
+    actor->jump_count = 0;
+
+    actor->gravity = 0.0f;
+
+    actor->is_collision_down = false;
+    actor->was_collision_down = false;
+
+    actor->input_x = 0;
+    actor->input_y = 0;
+
+    actor->animated_sprite = (struct animated_sprite){ 0 };
 }
 void actor_tick(struct actor* actor, float delta)
 {
-    vtable.items[actor->tag].tick(actor, delta);
+    if (vtable.items[actor->tag].tick)
+    {
+        vtable.items[actor->tag].tick(actor, delta);
+    }
 }
 void actor_draw(struct actor* actor)
 {
-    vtable.items[actor->tag].draw(actor);
+    animated_sprite_draw(&actor->animated_sprite);
 }
 
-void actor_base_free(struct actor* actor)
+struct actor actor_player_new(float x, float y, struct animated_sprite animated_sprite)
 {
-    struct actor_data* data = (struct actor_data*)actor->data;
+    struct actor actor = actor_new(ACTOR_PLAYER_TAG, NULL, x, y, animated_sprite);
 
-    free(data);
+    return actor;
 }
-void actor_base_tick(struct actor* actor, float delta)
+void actor_player_tick(struct actor* actor, float delta)
 {
-    struct actor_data* data = (struct actor_data*)actor->data;
+    actor->was_collision_down = actor->is_collision_down;
+    actor->is_collision_down = false;
 
     //
 
-    data->was_collision_down = data->is_collision_down;
-    data->is_collision_down = false;
+    actor->input_x = 0;
+    actor->input_y = 0;
+
+    if (IsKeyDown(KEY_LEFT)) --actor->input_x;
+    if (IsKeyDown(KEY_RIGHT)) ++actor->input_x;
 
     //
 
-    data->input_x = 0;
-    data->input_y = 0;
-
-    if (IsKeyDown(KEY_LEFT)) --data->input_x;
-    if (IsKeyDown(KEY_RIGHT)) ++data->input_x;
+    actor->x += 4.0f * actor->input_x;
 
     //
 
-    data->x += 4.0f * data->input_x;
-
-    //
-
-    data->vy += data->gravity * delta / 2.0f;
-    if (IsKeyPressed(KEY_SPACE) && data->jump_count < data->jump_limit)
+    actor->vy += actor->gravity * delta / 2.0f;
+    if (IsKeyPressed(KEY_SPACE) && actor->jump_count < actor->jump_limit)
     {
-        ++data->jump_count;
-        data->vy = -sqrtf(2.0f * data->gravity * data->jump_height);
+        ++actor->jump_count;
+        actor->vy = -sqrtf(2.0f * actor->gravity * actor->jump_height);
     }
-    data->vy += data->gravity * delta / 2.0f;
+    actor->vy += actor->gravity * delta / 2.0f;
 
     //
 
-    data->x += data->vx * delta;
-    data->y += data->vy * delta;
+    actor->x += actor->vx * delta;
+    actor->y += actor->vy * delta;
 
     //
 
-    if (data->x < 0)
+    if (actor->x < 0)
     {
-        data->x = 0.0f;
+        actor->x = 0.0f;
     }
-    if (data->x > GetScreenWidth() - 22.0f)
+    if (actor->x > GetScreenWidth() - 22.0f)
     {
-        data->x = GetScreenWidth() - 22.0f;
+        actor->x = GetScreenWidth() - 22.0f;
     }
-    if (data->y < 0)
+    if (actor->y < 0)
     {
-        data->y = 0.0f;
-        data->vy = 0.0f;
+        actor->y = 0.0f;
+        actor->vy = 0.0f;
     }
-    if (data->y > GetScreenHeight() - 22.0f)
+    if (actor->y > GetScreenHeight() - 22.0f)
     {
-        data->y = GetScreenHeight() - 22.0f;
-        data->vy = 0.0f;
-        data->jump_count = 0;
-        data->is_collision_down = true;
+        actor->y = GetScreenHeight() - 22.0f;
+        actor->vy = 0.0f;
+        actor->jump_count = 0;
+        actor->is_collision_down = true;
     }
 
     //
 
-    if (!data->is_collision_down)
+    if (!actor->is_collision_down)
     {
-        animated_sprite_play(&data->animated_sprite, "jump");
+        animated_sprite_play(&actor->animated_sprite, "jump");
     }
-    else if (data->input_x == 0)
+    else if (actor->input_x == 0)
     {
-        animated_sprite_play(&data->animated_sprite, "idle");
+        animated_sprite_play(&actor->animated_sprite, "idle");
     }
     else
     {
-        animated_sprite_play(&data->animated_sprite, "walk");
+        animated_sprite_play(&actor->animated_sprite, "walk");
     }
 
-    if (data->input_x == -1)
-        data->animated_sprite.is_flip_x = true;
-    else if (data->input_x == 1)
-        data->animated_sprite.is_flip_x = false;
+    if (actor->input_x == -1)
+    {
+        actor->animated_sprite.is_flip_x = true;
+    }
+    else if (actor->input_x == 1)
+    {
+        actor->animated_sprite.is_flip_x = false;
+    }
 
     //
 
-    animated_sprite_tick(&data->animated_sprite, delta);
-    data->animated_sprite.x = (int)data->x;
-    data->animated_sprite.y = (int)data->y;
-}
-void actor_base_draw(struct actor* actor)
-{
-    struct actor_data* data = (struct actor_data*)actor->data;
-
-    animated_sprite_draw(&data->animated_sprite);
+    animated_sprite_tick(&actor->animated_sprite, delta);
+    actor->animated_sprite.x = actor->x;
+    actor->animated_sprite.y = actor->y;
 }
